@@ -1,0 +1,9 @@
+# Things that have no business inside the installed extension. The bundle needs
+# index.js, manifest.json, package.json and node_modules - everything else here
+# is for setting the server up, not for running it.
+install.bat
+install_into_claude.py
+add-to-claude.bat
+claude-config-snippet.txt
+*.mcpb
+package-lock.json

@@ -1,0 +1,35 @@
+{
+  "_comment": [
+    "Copy this file to servers.json and fill in real values.",
+    "servers.json is gitignored: it holds real passwords and must not travel over",
+    "chat or email. Add one entry per server you want to be able to check.",
+    "",
+    "name      what the dropdown shows",
+    "logsDir   optional - MyApp's plaintext database/logs folder, on the",
+    "          machine running that backend. Without it the export-folder and",
+    "          scheduler checks are skipped, and the app says so.",
+    "psqlPath  optional - only if psql is somewhere unusual on this machine."
+  ],
+  "servers": [
+    {
+      "name": "myapp - postgres",
+      "host": "db.prod.example.internal",
+      "port": 5432,
+      "user": "myapp_svc",
+      "database": "postgres",
+      "password": "",
+      "sslmode": "require",
+      "logsDir": "D:\\myapp\\database\\logs",
+      "logDays": 7
+    },
+    {
+      "name": "myapp - json_store",
+      "host": "db.prod.example.internal",
+      "port": 5432,
+      "user": "myapp_svc",
+      "database": "myapp_json",
+      "password": "",
+      "sslmode": "require"
+    }
+  ]
+}

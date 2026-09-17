@@ -1,0 +1,71 @@
+# Two containers: a throwaway Postgres, and db-checker pointed at it.
+#
+#   docker compose up --build
+#   open http://localhost:8787
+#
+# The Postgres is seeded with a table that has 200,000 rows and no index, so the
+# checks find something real on the first run. No company data, nothing to break,
+# and you can `docker compose down -v` to wipe it all and start again.
+#
+#   docker compose down      stop, keep the data
+#   docker compose down -v   stop and delete the volumes too
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: demo-only-not-a-secret
+      POSTGRES_DB: demo
+    # Anything in this folder runs once, the first time the data volume is
+    # created. Re-running `up` will NOT re-seed - that catches everyone. Use
+    # `down -v` to force it.
+    volumes:
+      - ./docker/seed.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+      - pgdata:/var/lib/postgresql/data
+    # No `ports:` on purpose. db-checker reaches it over the private network
+    # between the containers; publishing 5432 to the host would only widen the
+    # surface for no benefit.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d demo"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  db-checker:
+    build: .
+    ports:
+      # host:container. Change the left number if 8787 is taken on your machine;
+      # the right one has to match DBC_PORT in the Dockerfile.
+      - "8787:8787"
+    volumes:
+      # servers.json is mounted, never baked into the image - the real one holds
+      # database passwords. Read-only, because the app has no reason to write it.
+      - ./servers.docker.json:/app/servers.json:ro
+      # State that must outlive the container.
+      #
+      # Both are NAMED VOLUMES, not folders on your machine, and reports/ is the
+      # interesting one. Bind-mounting ./reports looks friendlier - you could open
+      # the HTML straight from your editor - but the container runs as root, so
+      # every file it writes there is owned by root and your own user cannot
+      # delete or overwrite them. That is the most common Docker papercut there is.
+      #
+      # A named volume sidesteps it entirely: Docker owns the storage, permissions
+      # never cross the boundary. To read a report, copy it out:
+      #     docker compose cp db-checker:/app/reports/latest.html .
+      #
+      # The other fix is `user: "1000:1000"` on this service so the container
+      # writes as your host user. Worth knowing, but it then needs /data to be
+      # owned by 1000 too, which is a second thing to get right.
+      - dbcdata:/data
+      - reportsdata:/app/reports
+    depends_on:
+      postgres:
+        # Wait for the healthcheck, not just for the container to exist.
+        # Postgres accepts connections several seconds after it starts, and
+        # without this db-checker races it and reports the database as down.
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  dbcdata:
+  reportsdata:

@@ -1,0 +1,47 @@
+{
+  "_comment": [
+    "Copy to checks.json to add your own checks or switch built-in ones off.",
+    "The file is optional - without it you get the seven built-in checks.",
+    "",
+    "'disabled' names checks you do not want to see. Built-in or custom, same list.",
+    "",
+    "Each entry in 'checks' is one query. It MUST return a column named 'object'",
+    "(what the finding is about); every other column becomes the detail line.",
+    "It must be a single read-only SELECT or WITH - the tool refuses anything else,",
+    "and the connection itself is opened read-only, so a write cannot get through",
+    "even if the check tries.",
+    "",
+    "'fix' is optional. {column_name} is filled in from the row.",
+    "'note' is optional and shown once for the whole section, not per row."
+  ],
+
+  "disabled": [],
+
+  "checks": [
+    {
+      "name": "long_running_queries",
+      "title": "Queries running longer than 5 minutes",
+      "severity": "warn",
+      "enabled": true,
+      "note": "A long SELECT is usually a missing index. A long idle-in-transaction is worse - it holds locks and blocks VACUUM.",
+      "sql": "SELECT pid::text AS object, state, round(extract(epoch FROM now() - query_start)/60) AS minutes, left(regexp_replace(query, '\\s+', ' ', 'g'), 80) AS query FROM pg_stat_activity WHERE state <> 'idle' AND query_start < now() - interval '5 minutes' AND pid <> pg_backend_pid() ORDER BY query_start"
+    },
+    {
+      "name": "bloated_tables",
+      "title": "Tables where dead rows outnumber live ones",
+      "severity": "warn",
+      "enabled": false,
+      "note": "Autovacuum is not keeping up. The table is bigger on disk than its data needs, and every scan reads the dead rows too.",
+      "sql": "SELECT schemaname || '.' || relname AS object, n_live_tup AS live_rows, n_dead_tup AS dead_rows, coalesce(last_autovacuum::text, 'never') AS last_autovacuum FROM pg_stat_user_tables WHERE n_dead_tup > 50000 AND n_dead_tup > n_live_tup ORDER BY n_dead_tup DESC",
+      "fix": "VACUUM (ANALYZE, VERBOSE) {object};"
+    },
+    {
+      "name": "connection_headroom",
+      "title": "Connection slots in use",
+      "severity": "info",
+      "enabled": false,
+      "note": "MyApp opens a DataSource per request and does not pool, so this climbs under load.",
+      "sql": "SELECT 'connections' AS object, count(*) AS in_use, current_setting('max_connections') AS max_connections, round(100.0 * count(*) / current_setting('max_connections')::int) AS percent_used FROM pg_stat_activity"
+    }
+  ]
+}

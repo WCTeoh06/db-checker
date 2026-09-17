@@ -1,0 +1,11 @@
+{
+  "name": "db-checker-mcp-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server for the db-checker checks: run them from Claude, and add or remove checks and servers by asking.",
+  "main": "index.js",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "manifest_version": "0.3",
+  "name": "db-checker",
+  "version": "1.0.0",
+  "description": "Runs read-only PostgreSQL health checks for MyApp, and lets you add or remove checks and servers by asking.",
+  "author": {
+    "name": "your-name-here"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/index.js"],
+      "env": {
+        "DB_CHECKER_DIR": "${user_config.db_checker_dir}",
+        "PYTHON_PATH": "${user_config.python_path}"
+      }
+    }
+  },
+  "user_config": {
+    "db_checker_dir": {
+      "type": "directory",
+      "title": "db-checker folder",
+      "description": "Pick the folder holding db_checker.py and servers.json. Required: installing from a .mcpb copies this server into Claude's own extensions folder, so it cannot find the tool next to itself.",
+      "multiple": false,
+      "required": true
+    },
+    "python_path": {
+      "type": "string",
+      "title": "Python (optional)",
+      "description": "Only fill this in if 'python' is not on your PATH. Otherwise leave blank.",
+      "required": false
+    }
+  }
+}

@@ -1,0 +1,18 @@
+# Holds real database passwords.
+.env
+servers.json
+
+# Written on every edit by the MCP server, so the previous version is recoverable.
+*.bak
+
+reports/
+db-checker.sqlite3
+db-checker.sqlite3-*
+__pycache__/
+*.pyc
+mcp-server/node_modules/
+mcp-server/*.mcpb
+mcp-server/claude-config-snippet.txt
+
+# checks.json is deliberately NOT ignored: it has no secrets, and a check worth
+# writing is worth the rest of the team having.

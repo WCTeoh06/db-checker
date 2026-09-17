@@ -1,0 +1,24 @@
+{
+  "_comment": [
+    "For the Docker demo only. Mounted over servers.json inside the container.",
+    "",
+    "host is 'postgres' - the SERVICE NAME from docker-compose.yml, not localhost.",
+    "Compose gives each service a DNS name on a private network, and that name is",
+    "how containers find each other. 'localhost' inside a container means the",
+    "container itself, so it would find nothing.",
+    "",
+    "The password here is a throwaway for a disposable database. Never put a real",
+    "one in a file that is committed to git."
+  ],
+  "servers": [
+    {
+      "name": "demo (docker)",
+      "host": "postgres",
+      "port": 5432,
+      "user": "postgres",
+      "database": "demo",
+      "password": "demo-only-not-a-secret",
+      "sslmode": "disable"
+    }
+  ]
+}

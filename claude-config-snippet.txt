@@ -1,0 +1,9 @@
+Paste this inside "mcpServers" in Claude Desktop's config
+(Settings > Developer > Edit Config):
+
+    "db-checker": {
+      "command": "node",
+      "args": ["C:\\Users\\<you>\\path\\to\\db-checker\\mcp-server\\index.js"]
+    }
+
+Then restart Claude Desktop.
